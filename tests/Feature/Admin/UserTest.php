@@ -55,18 +55,18 @@ class UserTest extends TestCase
         $response->assertStatus(200);
     }
 
-    // /**
-    //  * 未ログインのユーザーは管理者側の会員詳細ページにアクセスできない
-    //  */
+    /**
+     * 未ログインのユーザーは管理者側の会員詳細ページにアクセスできない
+     */
     public function test_guest_cannot_access_admin_user_show(): void
     {
         $response = $this->get('/admin/users/');
         $response->assertRedirect('/admin/login');
     }
 
-    // /**
-    //  * ログイン済みの一般ユーザーは管理者側の会員詳細ページにアクセスできない
-    //  */
+    /**
+     * ログイン済みの一般ユーザーは管理者側の会員詳細ページにアクセスできない
+     */
     public function test_authenticated_user_cannot_access_admin_user_show(): void
     {
         $user = User::factory()->create();
@@ -75,9 +75,9 @@ class UserTest extends TestCase
         $response->assertRedirect('/admin/login');
     }
 
-    // /**
-    //  * ログイン済みの管理者は管理者側の会員詳細ページにアクセスできる
-    //  */
+    /**
+     * ログイン済みの管理者は管理者側の会員詳細ページにアクセスできる
+     */
     public function test_admin_can_access_admin_user_show(): void
     {
         $user = User::factory()->create();

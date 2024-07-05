@@ -118,6 +118,10 @@ return [
         '属性名' => [
             'ルール名' => 'カスタムメッセージ',
         ],
+
+        'opening_time' => [
+            'before_closing_time' => '開店時間は閉店時間より前でなければなりません。',
+        ],
     ],
 
     'attributes' => [],
