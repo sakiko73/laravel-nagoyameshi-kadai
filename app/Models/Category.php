@@ -17,4 +17,9 @@ class Category extends Model
     protected $fillable = [
         'name',
     ];
+    // リレーション設定
+    public function restaurants()
+    {
+        return $this->belongsToMany(Restaurant::class, 'category_restaurant');
+    }
 }

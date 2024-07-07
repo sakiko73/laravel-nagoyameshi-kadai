@@ -5,6 +5,7 @@ namespace Tests\Feature\Admin;
 use App\Models\Restaurant;
 use App\Models\User;
 use App\Models\Admin;
+use App\Models\Category;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -128,6 +129,12 @@ class RestaurantTest extends TestCase
      */
     public function test_guest_cannot_store_restaurant()
     {
+        // カテゴリのダミーデータを3つ作成し、それらのIDの配列を定義する
+        $category1 = Category::create(['name' => 'カテゴリ1']);
+        $category2 = Category::create(['name' => 'カテゴリ2']);
+        $category3 = Category::create(['name' => 'カテゴリ3']);
+        $category_ids = [$category1->id, $category2->id, $category3->id];
+
         $response = $this->post(route('admin.restaurants.store'), [
             'name' => 'テスト',
             'description' => 'テスト',
@@ -138,8 +145,17 @@ class RestaurantTest extends TestCase
             'opening_time' => '10:00:00',
             'closing_time' => '20:00:00',
             'seating_capacity' => 50,
+            'category_ids' => $category_ids,
         ]);
+
+        // レスポンスがリダイレクトであることを確認
         $response->assertRedirect(route('admin.login'));
+
+        // データベースにレストランが存在しないことを確認
+        $this->assertDatabaseMissing('restaurants', [
+            'name' => 'テスト',
+            'description' => 'テスト',
+        ]);
     }
 
     /**
@@ -147,6 +163,12 @@ class RestaurantTest extends TestCase
      */
     public function test_user_cannot_store_restaurant()
     {
+        // カテゴリのダミーデータを3つ作成し、それらのIDの配列を定義する
+        $category1 = Category::create(['name' => 'カテゴリ1']);
+        $category2 = Category::create(['name' => 'カテゴリ2']);
+        $category3 = Category::create(['name' => 'カテゴリ3']);
+        $category_ids = [$category1->id, $category2->id, $category3->id];
+
         $user = User::factory()->create();
         $this->actingAs($user);
         $response = $this->post(route('admin.restaurants.store'), [
@@ -159,8 +181,15 @@ class RestaurantTest extends TestCase
             'opening_time' => '10:00:00',
             'closing_time' => '20:00:00',
             'seating_capacity' => 50,
+            'category_ids' => $category_ids,
         ]);
         $response->assertRedirect(route('admin.login'));
+
+        // データベースにレストランが存在しないことを確認
+        $this->assertDatabaseMissing('restaurants', [
+            'name' => 'テスト',
+            'description' => 'テスト',
+        ]);
     }
 
     /**
@@ -168,11 +197,15 @@ class RestaurantTest extends TestCase
      */
     public function test_admin_can_store_restaurant()
     {
-        $admin = new Admin();
-        $admin->email = 'admin@example.com';
-        $admin->password = Hash::make('nagoyameshi');
-        $admin->save();
+        $admin = Admin::factory()->create();
         $this->actingAs($admin, 'admin');
+
+        // カテゴリのダミーデータを3つ作成し、それらのIDの配列を定義する
+        $category1 = Category::create(['name' => 'カテゴリ1']);
+        $category2 = Category::create(['name' => 'カテゴリ2']);
+        $category3 = Category::create(['name' => 'カテゴリ3']);
+        $category_ids = [$category1->id, $category2->id, $category3->id];
+
         $response = $this->post(route('admin.restaurants.store'), [
             'name' => 'テスト',
             'description' => 'テスト',
@@ -183,12 +216,23 @@ class RestaurantTest extends TestCase
             'opening_time' => '10:00',
             'closing_time' => '20:00',
             'seating_capacity' => 50,
+            'category_ids' => $category_ids,
         ]);
+        // レスポンスがリダイレクトであることを確認
         $response->assertRedirect(route('admin.restaurants.index'));
+        // データベースにレストランが存在しないことを確認
         $this->assertDatabaseHas('restaurants', [
             'name' => 'テスト',
             'description' => 'テスト',
         ]);
+        // データベースcategory_restaurantにcategory_idsが存在しないことを確認
+        $restaurant = Restaurant::where('name', 'テスト')->first();
+        foreach ($category_ids as $category_id) {
+            $this->assertDatabaseHas('category_restaurant', [
+                'category_id' => $category_id,
+                'restaurant_id' => $restaurant->id,
+            ]);
+        }
     }
 
     // editアクション（店舗編集ページ）
@@ -236,6 +280,13 @@ class RestaurantTest extends TestCase
     public function test_guest_cannot_update_restaurant()
     {
         $restaurant = Restaurant::factory()->create();
+
+        // カテゴリのダミーデータを3つ作成し、それらのIDの配列を定義する
+        $category1 = Category::create(['name' => 'カテゴリ1']);
+        $category2 = Category::create(['name' => 'カテゴリ2']);
+        $category3 = Category::create(['name' => 'カテゴリ3']);
+        $category_ids = [$category1->id, $category2->id, $category3->id];
+
         $response = $this->put(route('admin.restaurants.update', $restaurant), [
             'name' => '更新テスト',
             'description' => '更新テスト',
@@ -246,8 +297,21 @@ class RestaurantTest extends TestCase
             'opening_time' => '09:00:00',
             'closing_time' => '21:00:00',
             'seating_capacity' => 60,
+            'category_ids' => $category_ids,
         ]);
         $response->assertRedirect(route('admin.login'));
+        // データベースにレストランが存在しないことを確認
+        $this->assertDatabaseMissing('restaurants', [
+            'name' => '更新テスト',
+            'description' => '更新テスト',
+        ]);
+        // データベースcategory_restaurantにcategory_idsが存在しないことを確認
+        foreach ($category_ids as $category_id) {
+            $this->assertDatabaseMissing('category_restaurant', [
+                'category_id' => $category_id,
+                'restaurant_id' => $restaurant->id,
+            ]);
+        }
     }
 
     /**
@@ -257,7 +321,15 @@ class RestaurantTest extends TestCase
     {
         $user = User::factory()->create();
         $this->actingAs($user);
+
         $restaurant = Restaurant::factory()->create();
+
+        // カテゴリのダミーデータを3つ作成し、それらのIDの配列を定義する
+        $category1 = Category::create(['name' => 'カテゴリ1']);
+        $category2 = Category::create(['name' => 'カテゴリ2']);
+        $category3 = Category::create(['name' => 'カテゴリ3']);
+        $category_ids = [$category1->id, $category2->id, $category3->id];
+
         $response = $this->put(route('admin.restaurants.update', $restaurant), [
             'name' => '更新テスト',
             'description' => '更新テスト',
@@ -270,6 +342,18 @@ class RestaurantTest extends TestCase
             'seating_capacity' => 60,
         ]);
         $response->assertRedirect(route('admin.login'));
+        // データベースにレストランが存在しないことを確認
+        $this->assertDatabaseMissing('restaurants', [
+            'name' => '更新テスト',
+            'description' => '更新テスト',
+        ]);
+        // データベースcategory_restaurantにcategory_idsが存在しないことを確認
+        foreach ($category_ids as $category_id) {
+            $this->assertDatabaseMissing('category_restaurant', [
+                'category_id' => $category_id,
+                'restaurant_id' => $restaurant->id,
+            ]);
+        }
     }
 
     /**
@@ -277,12 +361,17 @@ class RestaurantTest extends TestCase
      */
     public function test_admin_can_update_restaurant()
     {
-        $admin = new Admin();
-        $admin->email = 'admin@example.com';
-        $admin->password = Hash::make('nagoyameshi');
-        $admin->save();
+        $admin = Admin::factory()->create();
         $this->actingAs($admin, 'admin');
+
         $restaurant = Restaurant::factory()->create();
+
+        // カテゴリのダミーデータを3つ作成し、それらのIDの配列を定義する
+        $category1 = Category::create(['name' => 'カテゴリ1']);
+        $category2 = Category::create(['name' => 'カテゴリ2']);
+        $category3 = Category::create(['name' => 'カテゴリ3']);
+        $category_ids = [$category1->id, $category2->id, $category3->id];
+
         $response = $this->put(route('admin.restaurants.update', $restaurant), [
             'name' => '更新テスト',
             'description' => '更新テスト',
@@ -293,12 +382,20 @@ class RestaurantTest extends TestCase
             'opening_time' => '09:00',
             'closing_time' => '21:00',
             'seating_capacity' => 60,
+            'category_ids' => $category_ids,
         ]);
         $response->assertRedirect(route('admin.restaurants.index'));
         $this->assertDatabaseHas('restaurants', [
             'name' => '更新テスト',
             'description' => '更新テスト',
         ]);
+        // データベースcategory_restaurantにcategory_idsが存在しないことを確認
+        foreach ($category_ids as $category_id) {
+            $this->assertDatabaseHas('category_restaurant', [
+                'category_id' => $category_id,
+                'restaurant_id' => $restaurant->id,
+            ]);
+        }
     }
 
     // destroyアクション（店舗削除機能）
