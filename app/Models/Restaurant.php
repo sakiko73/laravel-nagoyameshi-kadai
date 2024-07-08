@@ -26,4 +26,10 @@ class Restaurant extends Model
     {
         return $this->belongsToMany(Category::class, 'category_restaurant');
     }
+
+    // リレーションシップ
+    public function regular_holidays()
+    {
+    return $this->belongsToMany(RegularHoliday::class, 'regular_holiday_restaurant');
+    }
 }

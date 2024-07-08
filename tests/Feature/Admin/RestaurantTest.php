@@ -6,6 +6,7 @@ use App\Models\Restaurant;
 use App\Models\User;
 use App\Models\Admin;
 use App\Models\Category;
+use App\Models\RegularHoliday;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -135,6 +136,10 @@ class RestaurantTest extends TestCase
         $category3 = Category::create(['name' => 'カテゴリ3']);
         $category_ids = [$category1->id, $category2->id, $category3->id];
 
+        // 定休日のダミーデータを3つ作成し、それらのIDの配列を定義する
+        $regularHolidays = RegularHoliday::factory()->count(3)->create();
+        $regular_holiday_ids = $regularHolidays->pluck('id')->toArray();
+
         $response = $this->post(route('admin.restaurants.store'), [
             'name' => 'テスト',
             'description' => 'テスト',
@@ -146,6 +151,7 @@ class RestaurantTest extends TestCase
             'closing_time' => '20:00:00',
             'seating_capacity' => 50,
             'category_ids' => $category_ids,
+            'regular_holiday_ids' => $regular_holiday_ids,
         ]);
 
         // レスポンスがリダイレクトであることを確認
@@ -169,6 +175,10 @@ class RestaurantTest extends TestCase
         $category3 = Category::create(['name' => 'カテゴリ3']);
         $category_ids = [$category1->id, $category2->id, $category3->id];
 
+        // 定休日のダミーデータを3つ作成し、それらのIDの配列を定義する
+        $regularHolidays = RegularHoliday::factory()->count(3)->create();
+        $regular_holiday_ids = $regularHolidays->pluck('id')->toArray();
+
         $user = User::factory()->create();
         $this->actingAs($user);
         $response = $this->post(route('admin.restaurants.store'), [
@@ -182,6 +192,7 @@ class RestaurantTest extends TestCase
             'closing_time' => '20:00:00',
             'seating_capacity' => 50,
             'category_ids' => $category_ids,
+            'regular_holiday_ids' => $regular_holiday_ids,
         ]);
         $response->assertRedirect(route('admin.login'));
 
@@ -206,6 +217,10 @@ class RestaurantTest extends TestCase
         $category3 = Category::create(['name' => 'カテゴリ3']);
         $category_ids = [$category1->id, $category2->id, $category3->id];
 
+        // 定休日のダミーデータを3つ作成し、それらのIDの配列を定義する
+        $regularHolidays = RegularHoliday::factory()->count(3)->create();
+        $regular_holiday_ids = $regularHolidays->pluck('id')->toArray();
+
         $response = $this->post(route('admin.restaurants.store'), [
             'name' => 'テスト',
             'description' => 'テスト',
@@ -217,6 +232,7 @@ class RestaurantTest extends TestCase
             'closing_time' => '20:00',
             'seating_capacity' => 50,
             'category_ids' => $category_ids,
+            'regular_holiday_ids' => $regular_holiday_ids,
         ]);
         // レスポンスがリダイレクトであることを確認
         $response->assertRedirect(route('admin.restaurants.index'));
@@ -230,6 +246,14 @@ class RestaurantTest extends TestCase
         foreach ($category_ids as $category_id) {
             $this->assertDatabaseHas('category_restaurant', [
                 'category_id' => $category_id,
+                'restaurant_id' => $restaurant->id,
+            ]);
+        }
+
+        // データベースregular_holiday_restaurantにregular_holiday_idsが存在しないことを確認
+        foreach ($regular_holiday_ids as $regular_holiday_id) {
+            $this->assertDatabaseHas('regular_holiday_restaurant', [
+                'regular_holiday_id' => $regular_holiday_id,
                 'restaurant_id' => $restaurant->id,
             ]);
         }
@@ -287,6 +311,10 @@ class RestaurantTest extends TestCase
         $category3 = Category::create(['name' => 'カテゴリ3']);
         $category_ids = [$category1->id, $category2->id, $category3->id];
 
+        // 定休日のダミーデータを3つ作成し、それらのIDの配列を定義する
+        $regularHolidays = RegularHoliday::factory()->count(3)->create();
+        $regular_holiday_ids = $regularHolidays->pluck('id')->toArray();
+
         $response = $this->put(route('admin.restaurants.update', $restaurant), [
             'name' => '更新テスト',
             'description' => '更新テスト',
@@ -298,6 +326,7 @@ class RestaurantTest extends TestCase
             'closing_time' => '21:00:00',
             'seating_capacity' => 60,
             'category_ids' => $category_ids,
+            'regular_holiday_ids' => $regular_holiday_ids,
         ]);
         $response->assertRedirect(route('admin.login'));
         // データベースにレストランが存在しないことを確認
@@ -309,6 +338,13 @@ class RestaurantTest extends TestCase
         foreach ($category_ids as $category_id) {
             $this->assertDatabaseMissing('category_restaurant', [
                 'category_id' => $category_id,
+                'restaurant_id' => $restaurant->id,
+            ]);
+        }
+        // データベースregular_holiday_restaurantにregular_holiday_idsが存在しないことを確認
+        foreach ($regular_holiday_ids as $regular_holiday_id) {
+            $this->assertDatabaseMissing('regular_holiday_restaurant', [
+                'regular_holiday_id' => $regular_holiday_id,
                 'restaurant_id' => $restaurant->id,
             ]);
         }
@@ -330,6 +366,10 @@ class RestaurantTest extends TestCase
         $category3 = Category::create(['name' => 'カテゴリ3']);
         $category_ids = [$category1->id, $category2->id, $category3->id];
 
+        // 定休日のダミーデータを3つ作成し、それらのIDの配列を定義する
+        $regularHolidays = RegularHoliday::factory()->count(3)->create();
+        $regular_holiday_ids = $regularHolidays->pluck('id')->toArray();
+
         $response = $this->put(route('admin.restaurants.update', $restaurant), [
             'name' => '更新テスト',
             'description' => '更新テスト',
@@ -340,6 +380,7 @@ class RestaurantTest extends TestCase
             'opening_time' => '09:00:00',
             'closing_time' => '21:00:00',
             'seating_capacity' => 60,
+            'regular_holiday_ids' => $regular_holiday_ids,
         ]);
         $response->assertRedirect(route('admin.login'));
         // データベースにレストランが存在しないことを確認
@@ -351,6 +392,13 @@ class RestaurantTest extends TestCase
         foreach ($category_ids as $category_id) {
             $this->assertDatabaseMissing('category_restaurant', [
                 'category_id' => $category_id,
+                'restaurant_id' => $restaurant->id,
+            ]);
+        }
+        // データベースregular_holiday_restaurantにregular_holiday_idsが存在しないことを確認
+        foreach ($regular_holiday_ids as $regular_holiday_id) {
+            $this->assertDatabaseMissing('regular_holiday_restaurant', [
+                'regular_holiday_id' => $regular_holiday_id,
                 'restaurant_id' => $restaurant->id,
             ]);
         }
@@ -372,6 +420,10 @@ class RestaurantTest extends TestCase
         $category3 = Category::create(['name' => 'カテゴリ3']);
         $category_ids = [$category1->id, $category2->id, $category3->id];
 
+        // 定休日のダミーデータを3つ作成し、それらのIDの配列を定義する
+        $regularHolidays = RegularHoliday::factory()->count(3)->create();
+        $regular_holiday_ids = $regularHolidays->pluck('id')->toArray();
+
         $response = $this->put(route('admin.restaurants.update', $restaurant), [
             'name' => '更新テスト',
             'description' => '更新テスト',
@@ -383,6 +435,7 @@ class RestaurantTest extends TestCase
             'closing_time' => '21:00',
             'seating_capacity' => 60,
             'category_ids' => $category_ids,
+            'regular_holiday_ids' => $regular_holiday_ids,
         ]);
         $response->assertRedirect(route('admin.restaurants.index'));
         $this->assertDatabaseHas('restaurants', [
@@ -393,6 +446,13 @@ class RestaurantTest extends TestCase
         foreach ($category_ids as $category_id) {
             $this->assertDatabaseHas('category_restaurant', [
                 'category_id' => $category_id,
+                'restaurant_id' => $restaurant->id,
+            ]);
+        }
+        // データベースregular_holiday_restaurantにregular_holiday_idsが存在しないことを確認
+        foreach ($regular_holiday_ids as $regular_holiday_id) {
+            $this->assertDatabaseHas('regular_holiday_restaurant', [
+                'regular_holiday_id' => $regular_holiday_id,
                 'restaurant_id' => $restaurant->id,
             ]);
         }
