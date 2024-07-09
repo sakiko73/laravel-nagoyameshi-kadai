@@ -32,7 +32,7 @@ class UserFactory extends Factory
             'remember_token' => Str::random(10),
             'postal_code' => fake()->postcode(),
             'address' => fake()->address(),
-            'phone_number' => fake()->phoneNumber(),
+            'phone_number' => fake()->numerify('##########'),
         ];
     }
 

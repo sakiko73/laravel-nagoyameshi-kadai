@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\CompanyController;
 use App\Http\Controllers\Admin\TermController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\UserController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -63,4 +64,8 @@ Route::patch('terms/{term}/update', [TermController::class, 'update'])->name('te
 
 Route::group(['middleware' => 'guest:admin'], function () {
     Route::get('/', [HomeController::class, 'index'])->name('home');
+});
+
+Route::middleware(['auth', 'verified', 'guest:admin'])->group(function () {
+    Route::resource('user', UserController::class)->only(['index', 'edit', 'update']);
 });
