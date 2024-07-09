@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\CompanyController;
 use App\Http\Controllers\Admin\TermController;
+use App\Http\Controllers\HomeController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -16,9 +17,9 @@ use App\Http\Controllers\Admin\TermController;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
+//Route::get('/', function () {
+//    return view('welcome');
+//});
 
 require __DIR__.'/auth.php';
 
@@ -58,4 +59,8 @@ Route::patch('company/{company}/update', [CompanyController::class, 'update'])->
 Route::get('terms', [TermController::class, 'index'])->name('terms.index');
 Route::get('terms/{term}/edit', [TermController::class, 'edit'])->name('terms.edit');
 Route::patch('terms/{term}/update', [TermController::class, 'update'])->name('terms.update');
+});
+
+Route::group(['middleware' => 'guest:admin'], function () {
+    Route::get('/', [HomeController::class, 'index'])->name('home');
 });
