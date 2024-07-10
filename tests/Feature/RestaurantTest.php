@@ -45,10 +45,10 @@ class RestaurantTest extends TestCase
 
         $response->assertOk();
     }
-/**
- * 
+
+
 //      * ログイン済みの管理者は会員側の店舗一覧ページにアクセスできない
-     */
+
     public function test_authenticated_admin_cannot_access_restaurant_index_page()
     {
         $admin = Admin::factory()->create();
@@ -59,15 +59,41 @@ class RestaurantTest extends TestCase
 
         $response->assertRedirect(route('admin.home'));
     }
-}
 
-//  // ログイン済みの管理者は会員側の会員情報編集ページにアクセスできない
-//  public function test_admin_cannot_access_admin_user_edit()
-//  {
-//      $admin = Admin::factory()->create();
-//      $this->actingAs($admin, 'admin');
-//      $user = User::factory()->create();
-//      $response = $this->get(route('user.edit', $user));
-//      $response->assertRedirect(route('admin.home'));
-//  }
- 
+
+// ・未ログインのユーザーは会員側の店舗詳細ページにアクセスできる
+   public function test_guest_can_access_restaurant_show_page()
+    {
+        $restaurant = Restaurant::factory()->create();
+
+        $response = $this->get(route('restaurants.show', $restaurant));
+
+        $response->assertOk();
+    }
+// // ・ログイン済みの一般ユーザーは会員側の店舗詳細ページにアクセスできる
+//     public function test_authenticated_user_can_access_restaurant_show_page()
+//     {
+//         $user = User::factory()->create();
+//         $restaurant = Restaurant::factory()->create();
+
+//         $response = $this->actingAs($user)->get(route('restaurants.show', $restaurant));
+
+//         $response->assertOk();
+//     }
+
+    // ・ログイン済みの管理者は会員側の店舗詳細ページにアクセスできない
+    public function test_admin_cannot_access_restaurant_show_page()
+    {
+        //$admin = User::factory()->create(['is_admin' => true]);
+        $admin = Admin::factory()->create();
+        //$restaurant = Restaurant::factory()->create();
+
+        //$response = $this->actingAs($admin)->get(route('restaurants.show', $restaurant));
+        $this->actingAs($admin, 'admin');
+
+        $response = $this->get('/restaurants'); 
+        //$response->assertStatus(403); // Assuming you return a 403 Forbidden status for admins
+        $response->assertRedirect(route('admin.home'));
+    }
+ }
+

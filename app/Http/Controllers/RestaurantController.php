@@ -79,4 +79,12 @@ public function index(Request $request)
             'total' => $total,
         ]);
     }
+    public function show(Restaurant $restaurant)
+    {
+        // ビューにデータを渡す
+        return view('restaurants.show', [
+            'restaurant' => $restaurant,
+        ]);
+    }
 }
+
