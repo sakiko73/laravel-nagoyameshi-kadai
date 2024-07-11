@@ -8,6 +8,9 @@ use App\Http\Controllers\Admin\TermController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\RestaurantController;
+use App\Http\Controllers\SubscriptionController;
+use Illuminate\Http\Request;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -50,6 +53,58 @@ Route::group(['middleware' => 'guest:admin'], function () {
 
 Route::middleware(['auth', 'verified', 'guest:admin'])->group(function () {
     Route::resource('user', UserController::class)->only(['index', 'edit', 'update']);
+    Route::get('subscription/create', [SubscriptionController::class, 'create'])
+        ->name('subscription.create')
+        ->middleware('not.subscribed');
+    
+    Route::post('subscription/store', [SubscriptionController::class, 'store'])
+        ->name('subscription.store')
+        ->middleware('not.subscribed');
+    
+    Route::get('subscription/edit', [SubscriptionController::class, 'edit'])
+        ->name('subscription.edit')
+        ->middleware('subscribed');
+    
+    Route::patch('subscription/update', [SubscriptionController::class, 'update'])
+        ->name('subscription.update')
+        ->middleware('subscribed');
+    
+    Route::get('subscription/cancel', [SubscriptionController::class, 'cancel'])
+        ->name('subscription.cancel')
+        ->middleware('subscribed');
+    
+    Route::delete('subscription/destroy', [SubscriptionController::class, 'destroy'])
+        ->name('subscription.destroy')
+        ->middleware('subscribed');
 });
 
+
+
 Route::get('restaurants/{restaurant}', [RestaurantController::class, 'show'])->name('restaurants.show');
+
+// Route::middleware(['auth'])->group(function () {
+//     Route::get('subscription', [SubscriptionController::class, 'showSubscriptionPage'])->name('subscription.index');
+//     Route::post('subscription/create', [SubscriptionController::class, 'createSubscription'])->name('subscription.create');
+//     Route::post('subscription/cancel', [SubscriptionController::class, 'cancelSubscription'])->name('subscription.cancel');
+//     Route::post('subscription/resume', [SubscriptionController::class, 'resumeSubscription'])->name('subscription.resume');
+//     Route::get('subscription/create', [SubscriptionController::class, 'create'])->name('subscription.create.page'); // 新しいルート
+// });
+
+// use Illuminate\Http\Request;
+
+// Route::post('/user/subscribe', function (Request $request) {
+//     $request->user()->newSubscription(
+//         'default', 'price_monthly'
+//     )->create($request->paymentMethodId);
+//     });
+
+// Route::middleware(['auth'])->group(function () {
+    
+    // Route::get('subscription', [SubscriptionController::class, 'showSubscriptionPage'])->name('subscription.index');
+    // Route::post('subscription/create', [SubscriptionController::class, 'createSubscription'])->name('subscription.create');
+    // Route::post('subscription/cancel', [SubscriptionController::class, 'cancelSubscription'])->name('subscription.cancel');
+    // Route::post('subscription/resume', [SubscriptionController::class, 'resumeSubscription'])->name('subscription.resume');
+    // Route::get('subscription/create', [SubscriptionController::class, 'create'])->name('subscription.create.page'); // 新しいルート
+    // Route::post('subscription/store', [SubscriptionController::class, 'store'])->name('subscription.store'); // 新しいルート
+    // Route::get('subscription/edit', [SubscriptionController::class, 'edit'])->name('subscription.edit'); // 新しいルート
+    // });
