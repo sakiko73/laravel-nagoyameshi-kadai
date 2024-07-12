@@ -10,6 +10,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\RestaurantController;
 use App\Http\Controllers\SubscriptionController;
 use Illuminate\Http\Request;
+use App\Http\Controllers\ReviewController;
 
 /*
 |--------------------------------------------------------------------------
@@ -76,35 +77,20 @@ Route::middleware(['auth', 'verified', 'guest:admin'])->group(function () {
     Route::delete('subscription/destroy', [SubscriptionController::class, 'destroy'])
         ->name('subscription.destroy')
         ->middleware('subscribed');
-});
-
-
-
-Route::get('restaurants/{restaurant}', [RestaurantController::class, 'show'])->name('restaurants.show');
-
-// Route::middleware(['auth'])->group(function () {
-//     Route::get('subscription', [SubscriptionController::class, 'showSubscriptionPage'])->name('subscription.index');
-//     Route::post('subscription/create', [SubscriptionController::class, 'createSubscription'])->name('subscription.create');
-//     Route::post('subscription/cancel', [SubscriptionController::class, 'cancelSubscription'])->name('subscription.cancel');
-//     Route::post('subscription/resume', [SubscriptionController::class, 'resumeSubscription'])->name('subscription.resume');
-//     Route::get('subscription/create', [SubscriptionController::class, 'create'])->name('subscription.create.page'); // 新しいルート
-// });
-
-// use Illuminate\Http\Request;
-
-// Route::post('/user/subscribe', function (Request $request) {
-//     $request->user()->newSubscription(
-//         'default', 'price_monthly'
-//     )->create($request->paymentMethodId);
-//     });
-
-// Route::middleware(['auth'])->group(function () {
+        
     
-    // Route::get('subscription', [SubscriptionController::class, 'showSubscriptionPage'])->name('subscription.index');
-    // Route::post('subscription/create', [SubscriptionController::class, 'createSubscription'])->name('subscription.create');
-    // Route::post('subscription/cancel', [SubscriptionController::class, 'cancelSubscription'])->name('subscription.cancel');
-    // Route::post('subscription/resume', [SubscriptionController::class, 'resumeSubscription'])->name('subscription.resume');
-    // Route::get('subscription/create', [SubscriptionController::class, 'create'])->name('subscription.create.page'); // 新しいルート
-    // Route::post('subscription/store', [SubscriptionController::class, 'store'])->name('subscription.store'); // 新しいルート
-    // Route::get('subscription/edit', [SubscriptionController::class, 'edit'])->name('subscription.edit'); // 新しいルート
-    // });
+    
+    // レストランのレビュー一覧ページのルート
+    Route::get('restaurants/{restaurant}/reviews', [ReviewController::class, 'index'])->name('restaurants.reviews.index');
+    // レビュー投稿ページのルート
+    Route::get('restaurants/{restaurant}/reviews/create', [ReviewController::class, 'create'])->name('restaurants.reviews.create');
+    // レビュー投稿処理のルート
+    Route::post('restaurants/{restaurant}/reviews', [ReviewController::class, 'store'])->name('restaurants.reviews.store');
+    // レビュー編集ページのルート
+    Route::get('restaurants/{restaurant}/reviews/{review}/edit', [ReviewController::class, 'edit'])->name('restaurants.reviews.edit');
+    // レビュー更新処理のルート
+    Route::patch('restaurants/{restaurant}/reviews/{review}', [ReviewController::class, 'update'])->name('restaurants.reviews.update');
+    // レビュー削除処理のルート
+    Route::delete('restaurants/{restaurant}/reviews/{review}', [ReviewController::class, 'destroy'])->name('restaurants.reviews.destroy');
+    
+});
