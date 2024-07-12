@@ -11,6 +11,7 @@ use App\Http\Controllers\RestaurantController;
 use App\Http\Controllers\SubscriptionController;
 use Illuminate\Http\Request;
 use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\ReservationController; 
 
 /*
 |--------------------------------------------------------------------------
@@ -93,4 +94,11 @@ Route::middleware(['auth', 'verified', 'guest:admin'])->group(function () {
     // レビュー削除処理のルート
     Route::delete('restaurants/{restaurant}/reviews/{review}', [ReviewController::class, 'destroy'])->name('restaurants.reviews.destroy');
     
+});
+
+Route::middleware(['auth', 'verified', 'subscribed:premium_plan', 'guest:admin'])->group(function () {
+    Route::get('reservations', [ReservationController::class, 'index'])->name('reservations.index');
+    Route::get('restaurants/{restaurant}/reservations/create', [ReservationController::class, 'create'])->name('restaurants.reservations.create');
+    Route::post('restaurants/{restaurant}/reservations', [ReservationController::class, 'store'])->name('restaurants.reservations.store');
+    Route::delete('reservations/{reservation}', [ReservationController::class, 'destroy'])->name('reservations.destroy');
 });
