@@ -12,6 +12,7 @@ use App\Http\Controllers\SubscriptionController;
 use Illuminate\Http\Request;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\ReservationController; 
+use App\Http\Controllers\FavoriteController;
 
 /*
 |--------------------------------------------------------------------------
@@ -101,4 +102,10 @@ Route::middleware(['auth', 'verified', 'subscribed:premium_plan', 'guest:admin']
     Route::get('restaurants/{restaurant}/reservations/create', [ReservationController::class, 'create'])->name('restaurants.reservations.create');
     Route::post('restaurants/{restaurant}/reservations', [ReservationController::class, 'store'])->name('restaurants.reservations.store');
     Route::delete('reservations/{reservation}', [ReservationController::class, 'destroy'])->name('reservations.destroy');
+});
+
+Route::middleware(['auth', 'verified', 'subscribed:premium_plan'])->group(function () {
+    Route::get('/favorites', [FavoriteController::class, 'index'])->name('favorites.index');
+    Route::post('/favorites/{restaurant_id}', [FavoriteController::class, 'store'])->name('favorites.store');
+    Route::delete('/favorites/{restaurant_id}', [FavoriteController::class, 'destroy'])->name('favorites.destroy');
 });
