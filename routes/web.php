@@ -3,8 +3,8 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin;
 use App\Http\Controllers\Admin\CategoryController;
-use App\Http\Controllers\Admin\CompanyController;
-use App\Http\Controllers\Admin\TermController;
+use App\Http\Controllers\Admin\CompanyController as AdminCompanyController;
+use App\Http\Controllers\Admin\TermController as AdminTermController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\RestaurantController;
@@ -13,6 +13,9 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\ReservationController; 
 use App\Http\Controllers\FavoriteController;
+use App\Http\Controllers\CompanyController as MemberCompanyController;
+use App\Http\Controllers\TermController as MemberTermController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -38,14 +41,14 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'auth:admin
     Route::resource('categories', Admin\CategoryController::class);
 
     // Company routes
-    Route::get('company', [CompanyController::class, 'index'])->name('company.index');
-    Route::get('company/{company}/edit', [CompanyController::class, 'edit'])->name('company.edit');
-    Route::patch('company/{company}/update', [CompanyController::class, 'update'])->name('company.update');
+    Route::get('company', [AdminCompanyController::class, 'index'])->name('company.index');
+    Route::get('company/{company}/edit', [AdminCompanyController::class, 'edit'])->name('company.edit');
+    Route::patch('company/{company}/update', [AdminCompanyController::class, 'update'])->name('company.update');
 
     // Term routes
-    Route::get('terms', [TermController::class, 'index'])->name('terms.index');
-    Route::get('terms/{term}/edit', [TermController::class, 'edit'])->name('terms.edit');
-    Route::patch('terms/{term}/update', [TermController::class, 'update'])->name('terms.update');
+    Route::get('terms', [AdminTermController::class, 'index'])->name('terms.index');
+    Route::get('terms/{term}/edit', [AdminTermController::class, 'edit'])->name('terms.edit');
+    Route::patch('terms/{term}/update', [AdminTermController::class, 'update'])->name('terms.update');
 });
 
 Route::group(['middleware' => 'guest:admin'], function () {
@@ -109,3 +112,14 @@ Route::middleware(['auth', 'verified', 'subscribed:premium_plan'])->group(functi
     Route::post('/favorites/{restaurant_id}', [FavoriteController::class, 'store'])->name('favorites.store');
     Route::delete('/favorites/{restaurant_id}', [FavoriteController::class, 'destroy'])->name('favorites.destroy');
 });
+
+
+Route::middleware(['guest:admin'])->group(function () {
+    Route::get('/company', [MemberCompanyController::class, 'index'])->name('company.index');
+    Route::get('/terms', [MemberTermController::class, 'index'])->name('terms.index');
+});
+// // 認可ミドルウェアを使用して、管理者としてログインしていない状態でのみアクセスを許可
+// Route::middleware(['auth', 'can:access-member-pages'])->group(function () {
+//     Route::get('/company', [MemberCompanyController::class, 'index'])->name('company.index');
+//     Route::get('/terms', [TermController::class, 'index'])->name('terms.index');
+// });
